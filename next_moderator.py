@@ -150,8 +150,8 @@ else:
     with col1:
         available_team = st.multiselect(
             "Who is available to moderate?",
-            ["Alina", "Christian", "Michael", "Mostafa", "Nived", "Sushant"],
-            ["Alina", "Christian", "Michael", "Mostafa", "Nived", "Sushant"],
+            ["Alina", "Christian", "Michael", "Mostafa", "Nived", "Simon", "Sushant"],
+            ["Alina", "Christian", "Michael", "Mostafa", "Nived", "Simon", "Sushant"],
         )
     with col2:
         nxt_dt = st.date_input("Next Stand-Up's Date", nxt_dt_dflt)
