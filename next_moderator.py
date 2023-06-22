@@ -46,6 +46,20 @@ def get_df_mod():
     return df_mod
 
 
+@st.cache_data
+def get_df_usr():
+    df_usr = read_from_blob_storage("moderators.csv", connection_string, container_name)
+    users = df_usr["Moderator"].to_list()
+    users.sort()
+    return users
+
+
+def save_df_usr(users):
+    df_usr = pd.DataFrame({"Moderator": users})
+    output = df_usr.to_csv(encoding="utf-8", index=False)
+    upload_to_blob_storage(output, "moderators.csv", connection_string, container_name)
+
+
 # randomize the next moderator
 def get_nxt_mod(lst_mod, available_team):
     nxt_mod = random.choice(available_team)
@@ -105,7 +119,9 @@ with col2:
 # initialize data for initial view
 connection_string = st.secrets.blob_credentials.connection_string
 container_name = st.secrets.blob_credentials.container_name
+
 df_mod = get_df_mod()
+users = get_df_usr()
 lst_mod = df_mod["Moderator"].iloc[-1]
 lst_dt = df_mod["Date"].iloc[-1]
 tdy = dt.datetime.date(dt.datetime.today())
@@ -114,20 +130,36 @@ tdy = dt.datetime.date(dt.datetime.today())
 # default next moderation date will default to next Monday, Wednesday, or Friday, whichever is closest
 if tdy.isoweekday() == 6:
     st.markdown(
-        "<p style='text-align: center; font-size: 75px; color: #072543'><b>Tool is off on Saturdays.</b></p>",
+        "<p style='text-align: center; font-size: 50px; color: #072543'><b>Tool is under contract, and Saturdays are off!</b></p>",
         unsafe_allow_html=True,
     )
     st.markdown(
-        "<p style='text-align: center; font-size: 70px'><b>🛌</b></p>",
+        "<p style='text-align: center; font-size: 75px'><b>🛌</b></p>",
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        "<p style='text-align: center; font-size: 25px; color: #FFB000'><b>Next Moderator</b></p>",
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        f"<p style='text-align: center; font-size: 50px; color: #072543'><b>{lst_mod}</b></p>",
         unsafe_allow_html=True,
     )
 elif tdy.isoweekday() == 7:
     st.markdown(
-        "<p style='text-align: center; font-size: 75px; color: #072543'><b>Tool is off on Sundays.</b></p>",
+        "<p style='text-align: center; font-size: 50px; color: #072543'><b>Tool is under contract, and Sundays are off!</b></p>",
         unsafe_allow_html=True,
     )
     st.markdown(
-        "<p style='text-align: center; font-size: 70px'><b>🛌</b></p>",
+        "<p style='text-align: center; font-size: 75px'><b>🛌",
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        "<p style='text-align: center; font-size: 25px; color: #FFB000'><b>Next Moderator</b></p>",
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        f"<p style='text-align: center; font-size: 50px; color: #072543'><b>{lst_mod}</b></p>",
         unsafe_allow_html=True,
     )
 else:
@@ -146,21 +178,48 @@ else:
         f"<p style='text-align: center; font-size: 50px; color: #072543'><b>{lst_mod}</b></p>",
         unsafe_allow_html=True,
     )
-    col1, col2 = st.columns([4, 1])
+    col1, col2 = st.columns([7, 2])
     with col1:
         available_team = st.multiselect(
             "Who is available to moderate?",
-            ["Alina", "Christian", "Michael", "Mostafa", "Nived", "Simon", "Sushant"],
-            ["Alina", "Christian", "Michael", "Mostafa", "Nived", "Simon", "Sushant"],
+            users,
+            users,
         )
     with col2:
         nxt_dt = st.date_input("Next Stand-Up's Date", nxt_dt_dflt)
 
-    col1, col2, col3 = st.columns([1, 3, 1])
-    with col2:
+    col1, col2, col3, col4, col5, col6, col7 = st.columns([1, 0.75, 1, 0.25, 3, 1, 2])
+    with col5:
         button_nxt_mod = st.button(label="Get Lucky!")
-    with col3:
+    with col7:
         save_ck = st.checkbox("Save Results", True)
+    with col1:
+        user_ck = st.checkbox("Edit Moderators", False)
+    with col2:
+        if user_ck:
+            action = st.radio(
+                "",
+                ("➕", "➖"),
+                label_visibility="collapsed",
+                horizontal=True,
+            )
+    with col3:
+        if user_ck:
+            if action == "➕":
+                edit = st.text_input("", label_visibility="collapsed").title()
+            elif action == "➖":
+                edit = st.selectbox("", users, label_visibility="collapsed")
+    with col4:
+        if user_ck:
+            button_save = st.button(label="💾")
+            if button_save & (action == "➕") & len(edit) > 0:
+                users.append(edit)
+                save_df_usr(users)
+                get_df_usr.clear()
+            elif button_save & (action == "➖"):
+                users.remove(edit)
+                save_df_usr(users)
+                get_df_usr.clear()
 
     st.write("")
 
