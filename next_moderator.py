@@ -112,7 +112,7 @@ with col1:
     st.image("logo.png", width=120)
 with col2:
     st.markdown(
-        "<p style='text-align: right; font-size: 25px; color: #FFB000'><b>BI Installation's <span style='color: #072543'>Next Moderator</span></b></p>",
+        "<p style='text-align: right; font-size: 25px; color: #FFB000'><b>BI Fulfillment's <span style='color: #072543'>Next Moderator</span></b></p>",
         unsafe_allow_html=True,
     )
 
