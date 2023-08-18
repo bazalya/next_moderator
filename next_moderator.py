@@ -32,7 +32,7 @@ def prepare_xlsx_for_upload(tuples_list):
     writer = pd.ExcelWriter(output, engine="xlsxwriter")
     for x in tuples_list:
         x[0].to_excel(writer, sheet_name=x[1], index=False)
-    writer.save()
+    writer.close()
     return output.getvalue()
 
 
