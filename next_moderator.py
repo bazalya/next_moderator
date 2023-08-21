@@ -438,7 +438,7 @@ elif selectbox_page == "🪩 Retrospectives":
                 moderators,
             )
         with col2:
-            next_date = st.date_input("Next Retrospective's Date")
+            next_date = st.date_input("Next Retrospective's Date", last_date)
 
         col1, col2, col3 = st.columns([1, 3, 1])
         with col2:
